@@ -23,7 +23,7 @@ log_handler.setFormatter(log_formatter)
 log.addHandler(log_handler)
 log.setLevel(logging.ERROR)
 
-LIBRARY_PATH = "~/quiver.qvlibrary"
+LIBRARY_PATH = "/Users/changeme/quiver.qvlibrary"
 
 def quiver(path):
     book_ext = '.qvnotebook'
