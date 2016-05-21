@@ -25,7 +25,7 @@ An utility to export Quiver notebooks to a markdown files.
 ## Usage
 
 	usage: qt.py [-h] [-l] [-q QUERY] [-n NOTEBOOKS] [-e EXCLUDE_NOTEBOOKS]
-	             [-x EXPORT] [-v VERBOSE] [-L LIBRARY]
+	             [-x EXPORT] [-v] [-L LIBRARY]
 
 	Quiver helper
 
@@ -33,16 +33,15 @@ An utility to export Quiver notebooks to a markdown files.
 	  -h, --help            show this help message and exit
 	  -l, --list            List notebooks
 	  -q QUERY, --query QUERY
-	                        Search for
+	                        Search notebooks notes for
 	  -n NOTEBOOKS, --notebooks NOTEBOOKS
 	                        Restrict search in notebooks. List uuid space
 	                        separated
 	  -e EXCLUDE_NOTEBOOKS, --exclude_notebooks EXCLUDE_NOTEBOOKS
 	                        Exclude notebooks from search
 	  -x EXPORT, --export EXPORT
-	                        Export in markdown to folder.
-	  -v VERBOSE, --verbose VERBOSE
-	                        log operations
+	                        Export folder.
+	  -v, --verbose         Verbose
 	  -L LIBRARY, --library LIBRARY
 	                        Library path
 
