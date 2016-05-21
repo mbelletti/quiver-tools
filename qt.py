@@ -24,7 +24,7 @@ log.addHandler(log_handler)
 log.setLevel(logging.ERROR)
 
 LIBRARY_PATH = "~/quiver.qvlibrary"
-    
+
 def quiver(path):
     book_ext = '.qvnotebook'
     def _get_notebooks():
@@ -204,7 +204,7 @@ def md_export(notebooks, folder):
             with open(os.path.join(nf, sane(n['title']) + '.md'), mode='w') as f:
                 for c in n['cells']:
                     s = c['data'].replace('quiver-image-url', 'resources')
-                    s = c['data'].replace('quiver-file-url', 'resources')                    
+                    s = s.replace('quiver-file-url', 'resources')
                     links = re.findall(re_note_link, s, re.I)
                     for l in links:
                         s = s.replace('quiver-note-url/' + l, get_note_filename(nb['notes'][l]))
