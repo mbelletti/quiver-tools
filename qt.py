@@ -44,6 +44,7 @@ def quiver(path):
     def _get_note(nb, notedir):
         lpath = os.path.join(path, nb['uuid'] + book_ext, notedir)
         n = json.loads(open(os.path.join(lpath, 'meta.json')).read())
+        n.update(dict(nb=nb['name'], nb_uuid=nb['uuid'],))
         n.update(json.loads(open(os.path.join(lpath, 'content.json')).read()))
         if 'resources' in os.listdir(lpath):
             n.update({'resources': os.path.join(lpath, 'resources')})
@@ -246,15 +247,21 @@ def main():
     parser.add_argument("-x", "--export",  help="Export in markdown to folder.",
                         default='',type=str)    
     parser.add_argument("-v", "--verbose",  help="log operations",
-                        default=False, type=bool)    
+                        default=False, action="store_true")    
     parser.add_argument("-L", "--library",  help="Library path",
                         default=LIBRARY_PATH, type=str)    
     args = parser.parse_args()
 
+    
+
     if not os.path.exists(args.library):
-        print args.library + " doesn't exists"
+        log.error('Quiver library not found. ')
+        log.error("%s doesn't exists." % args.library )
         sys.exit(1)
 
+    if args.verbose:
+        log.setLevel(logging.INFO)
+        
     notebooks = quiver(args.library)
     
     query = args.query
@@ -265,14 +272,16 @@ def main():
         notebooks = [nb for nb in notebooks if nb['uuid'] in args.notebooks]
         
     if args.list:
-        #print ",\n".join([str((nb['name'], nb['uuid'])) for nb in notebooks if re.match(args.query, nb['name'])])
         print ",\n".join([str({k: nb[k] for k in nb if k != 'notes'}) for nb in notebooks if re.match(args.query, nb['name'])])
     elif args.export:
         md_export(notebooks, args.export)        
     else:
         notes = searchin_notebook(notebooks, args.query)
         if notes:
-            print "\n".join([n['title'] + ':\n' + n['uuid'] for n in notes])
+            print ",\n".join([str({'uuid': n['uuid'], 
+                                   'title': n['title'],
+                                   'notebook': n['nb']}) for n in notes])
+            #print "\n".join([n['title'] + ':\n' + n['uuid'] for n in notes])
         else:
             print "Nothing found"
 
