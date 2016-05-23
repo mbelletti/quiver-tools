@@ -238,20 +238,20 @@ def main():
     parser = argparse.ArgumentParser(description='Quiver helper')
     parser.add_argument("-l", "--list",  help="List notebooks",
                         action="store_true")
-    parser.add_argument("-q", "--query", help="Search notebooks notes for", default='.*',
+    parser.add_argument("-q", "--query", help="Search <query> in notes", default='.*',
                         type=str)
-    parser.add_argument("-n", "--notebooks", help="""Restrict search in notebooks. List uuid space separated""",
+    parser.add_argument("-n", "--notebooks", help="""Restrict search in notebooks. Needs uuids space separated""",
                         type=str)
-    parser.add_argument("-e", "--exclude_notebooks", help="Exclude notebooks from search",
+    parser.add_argument("-e", "--exclude_notebooks", help="Exclude notebooks from search. Needs uuids space separated",
                         type=str)
-    parser.add_argument("-x", "--export",  help="Export folder.",
+    parser.add_argument("-x", "--export",  help="Export to folder",
                         default='',type=str)    
     parser.add_argument("-v", "--verbose",  help="Verbose",
                         default=False, action="store_true")    
-    parser.add_argument("-L", "--library",  help="Library path",
+    parser.add_argument("-L", "--library",  help="Quiver library path",
                         default=LIBRARY_PATH, type=str)    
     args = parser.parse_args()
-
+ 
     
 
     if not os.path.exists(args.library):
