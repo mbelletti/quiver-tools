@@ -1,7 +1,7 @@
 quiver-tools aka qt
 ===================
 
-An utility to export Quiver notebooks to a markdown files.
+An utility to search or export Quiver notebooks to a markdown files.
 
 [Quiver](http://happenapps.com/#quiver) is a great notebook app built for programmers. Code and text can be freely mixed. 
 
@@ -33,17 +33,18 @@ An utility to export Quiver notebooks to a markdown files.
 	  -h, --help            show this help message and exit
 	  -l, --list            List notebooks
 	  -q QUERY, --query QUERY
-	                        Search notebooks notes for
+	                        Search <query> in notes
 	  -n NOTEBOOKS, --notebooks NOTEBOOKS
-	                        Restrict search in notebooks. List uuid space
+	                        Restrict search in notebooks. Needs uuids space
 	                        separated
 	  -e EXCLUDE_NOTEBOOKS, --exclude_notebooks EXCLUDE_NOTEBOOKS
-	                        Exclude notebooks from search
+	                        Exclude notebooks from search. Needs uuids space
+	                        separated
 	  -x EXPORT, --export EXPORT
-	                        Export folder.
+	                        Export to folder
 	  -v, --verbose         Verbose
 	  -L LIBRARY, --library LIBRARY
-	                        Library path
+	                        Quiver library path
 
 ## Feature Requests and Issues
 
