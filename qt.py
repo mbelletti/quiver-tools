@@ -145,6 +145,15 @@ def md_export(notebooks, folder):
         cleanedFilename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore')
         return ''.join(c for c in cleanedFilename if c in validFilenameChars)
     
+    def check_fname(fname):
+        i = 0
+        name = fname
+        while os.path.exists(name):
+            i += 1
+            name = os.path.splitext(fname)[0] + '_' + str(i) + os.path.splitext(fname)[1]
+        return name
+
+    
     url_raphael = 'https://raw.githubusercontent.com/DmitryBaranovskiy/raphael/master/raphael-min.js'
     url_underscore = 'https://raw.githubusercontent.com/jashkenas/underscore/master/underscore-min.js'
     url_sequence_diagram = 'https://raw.githubusercontent.com/bramp/js-sequence-diagrams/master/build/sequence-diagram-min.js'
@@ -202,7 +211,8 @@ def md_export(notebooks, folder):
                 os.system('cp -r "%s" "%s"' % (n['resources'], nf))
                 
             j_included = False
-            with open(os.path.join(nf, sane(n['title']) + '.md'), mode='w') as f:
+            fname = check_fname(os.path.join(nf, sane(n['title']) + '.md'))
+            with open(fname, mode='w') as f:
                 for c in n['cells']:
                     s = c['data'].replace('quiver-image-url', 'resources')
                     s = s.replace('quiver-file-url', 'resources')
@@ -212,6 +222,7 @@ def md_export(notebooks, folder):
                     s += '\n'
                     if c['type'] == 'code':
                         s = "```\n" + s + "\n```"
+                        f.write(s.encode('utf8'))
                     elif c['type'] == 'diagram':
                         if not j_included:
                             f.write(js_include)
