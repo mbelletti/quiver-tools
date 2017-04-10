@@ -154,10 +154,10 @@ def md_export(notebooks, folder):
         return name
 
     
-    url_raphael = 'https://raw.githubusercontent.com/DmitryBaranovskiy/raphael/master/raphael-min.js'
+    url_raphael = 'https://raw.githubusercontent.com/DmitryBaranovskiy/raphael/master/raphael.min.js'
     url_underscore = 'https://raw.githubusercontent.com/jashkenas/underscore/master/underscore-min.js'
-    url_sequence_diagram = 'https://raw.githubusercontent.com/bramp/js-sequence-diagrams/master/build/sequence-diagram-min.js'
     url_flowchart = 'https://raw.githubusercontent.com/adrai/flowchart.js/master/release/flowchart.min.js'
+    url_sequence_diagram = 'https://raw.githubusercontent.com/bramp/js-sequence-diagrams/master/dist/sequence-diagram-min.js'
     
     js_include = """
     <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
