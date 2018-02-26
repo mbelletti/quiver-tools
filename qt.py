@@ -29,11 +29,12 @@ def quiver(path):
     book_ext = '.qvnotebook'
     def _get_notebooks():
         for n in sorted(os.listdir(path)):
-            #k = os.path.splitext(n)[0]
-            d = json.loads(open(os.path.join(path, n, 'meta.json')).read())
-            #print d
-            d['notes'] = _get_notes(d)
-            yield d    
+            if n.endswith(book_ext):
+                #k = os.path.splitext(n)[0]
+                d = json.loads(open(os.path.join(path, n, 'meta.json')).read())
+                #print d
+                d['notes'] = _get_notes(d)
+                yield d    
 
     def _get_notes(nb):
         lpath = os.path.join(path, nb['uuid'] + book_ext)
