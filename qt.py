@@ -23,17 +23,18 @@ log_handler.setFormatter(log_formatter)
 log.addHandler(log_handler)
 log.setLevel(logging.ERROR)
 
-LIBRARY_PATH = "/Users/changeme/quiver.qvlibrary"
+LIBRARY_PATH = "/changeme/Quiver.qvlibrary"
 
 def quiver(path):
     book_ext = '.qvnotebook'
     def _get_notebooks():
         for n in sorted(os.listdir(path)):
-            #k = os.path.splitext(n)[0]
-            d = json.loads(open(os.path.join(path, n, 'meta.json')).read())
-            #print d
-            d['notes'] = _get_notes(d)
-            yield d    
+            if n.endswith(book_ext):
+                #k = os.path.splitext(n)[0]
+                d = json.loads(open(os.path.join(path, n, 'meta.json')).read())
+                #print d
+                d['notes'] = _get_notes(d)
+                yield d    
 
     def _get_notes(nb):
         lpath = os.path.join(path, nb['uuid'] + book_ext)
@@ -89,7 +90,7 @@ def alfred_search(query, lib=LIBRARY_PATH, on_notebooks=None, exclude_notebooks=
         # items is a list tags
         xml_head = '<?xml version="1.0"?>'
         out = tag('items', "".join([i for i in items]))
-        print xml_head + out
+        print(xml_head + out)
 
 
     note_ae = lambda note, attrs=default_attrs: ae(note['title'], note['uuid'], attrs=attrs)
@@ -139,10 +140,11 @@ def searchin_notes(notes, query):
 def md_export(notebooks, folder):
     """Export quiver contents in markdown"""
     
-    validFilenameChars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    #validFilenameChars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    validFilenameChars = "-_.() {}{}".format(string.ascii_letters, string.digits)
     
     def sane(filename):
-        cleanedFilename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore')
+        cleanedFilename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore').decode('ascii')
         return ''.join(c for c in cleanedFilename if c in validFilenameChars)
     
     def check_fname(fname):
@@ -159,7 +161,7 @@ def md_export(notebooks, folder):
     url_flowchart = 'https://raw.githubusercontent.com/adrai/flowchart.js/master/release/flowchart.min.js'
     url_sequence_diagram = 'https://raw.githubusercontent.com/bramp/js-sequence-diagrams/master/dist/sequence-diagram-min.js'
     
-    js_include = """
+    js_include = b"""
     <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
     <script src="../.resources/raphael-min.js"></script>
     <script src="../.resources/underscore-min.js"></script>
@@ -167,7 +169,7 @@ def md_export(notebooks, folder):
     <script src="../.resources/flowchart.min.js"></script>
     """
     
-    tpl_flow = """<script>
+    tpl_flow = b"""<script>
         var diagram = flowchart.parse(document.getElementById('flowtext').innerText);
         diagram.drawSVG('flow');
     </script>
@@ -206,13 +208,14 @@ def md_export(notebooks, folder):
         os.system('mkdir -p "%s"' % nf)
         for kk in nb['notes']:
             n = nb['notes'][kk]
-            log.debug(n['title'])            
-            if n.has_key('resources'):
+            log.debug(n['title'])     
+            resources = n.get('resources')
+            if resources:
                 os.system('cp -r "%s" "%s"' % (n['resources'], nf))
                 
             j_included = False
             fname = check_fname(os.path.join(nf, sane(n['title']) + '.md'))
-            with open(fname, mode='w') as f:
+            with open(fname, mode='wb') as f:
                 for c in n['cells']:
                     s = c['data'].replace('quiver-image-url', 'resources')
                     s = s.replace('quiver-file-url', 'resources')
@@ -222,22 +225,25 @@ def md_export(notebooks, folder):
                     s += '\n'
                     if c['type'] == 'code':
                         s = "```\n" + s + "\n```"
-                        f.write(s.encode('utf8'))
+                        f.write(s.encode('utf8')) #.decode('utf8'))
                     elif c['type'] == 'diagram':
                         if not j_included:
                             f.write(js_include)
                             j_included = True
                         if c['diagramType'] == 'sequence':
                             s = '<div class="sequence">' + s + '</div>\n'
-                            f.write(s.encode('utf8'))
+                            f.write(s.encode('utf8')) #.decode('utf8'))
                         elif c['diagramType'] == 'flow':
-                            f.write('\n<div id="flowtext">' + s.replace('\n', '<br>') + '</div>\n')
-                            f.write('\n<div id="flow"></div>\n')
+                            f.write(str('\n<div id="flowtext">' + s.replace('\n', '<br>') + '</div>\n').encode('utf8'))
+                            f.write('\n<div id="flow"></div>\n'.encode('utf8'))
                             f.write(tpl_flow)
                     else:
-                        f.write(s.encode('utf8'))
+                        try:
+                            f.write(s.encode('utf8')) #.decode('utf8'))
+                        except:
+                            f.write(s.encode('utf8').decode('utf8'))
                 if j_included:
-                    j = """
+                    j = b"""
 <script>
 $(".sequence").sequenceDiagram({theme: 'simple'});
 </script>                    
@@ -283,18 +289,18 @@ def main():
         notebooks = [nb for nb in notebooks if nb['uuid'] in args.notebooks]
         
     if args.list:
-        print ",\n".join([str({k: nb[k] for k in nb if k != 'notes'}) for nb in notebooks if re.match(args.query, nb['name'])])
+        print(",\n".join([str({k: nb[k] for k in nb if k != 'notes'}) for nb in notebooks if re.match(args.query, nb['name'])]))
     elif args.export:
         md_export(notebooks, args.export)        
     else:
         notes = searchin_notebook(notebooks, args.query)
         if notes:
-            print ",\n".join([str({'uuid': n['uuid'], 
+            print( ",\n".join([str({'uuid': n['uuid'], 
                                    'title': n['title'],
-                                   'notebook': n['nb']}) for n in notes])
+                                   'notebook': n['nb']}) for n in notes]))
             #print "\n".join([n['title'] + ':\n' + n['uuid'] for n in notes])
         else:
-            print "Nothing found"
+            print("Nothing found")
 
 
 if __name__ == '__main__':
