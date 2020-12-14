@@ -159,21 +159,43 @@ def md_export(notebooks, folder):
     url_raphael = 'https://raw.githubusercontent.com/DmitryBaranovskiy/raphael/master/raphael.min.js'
     url_underscore = 'https://raw.githubusercontent.com/jashkenas/underscore/master/underscore-min.js'
     url_flowchart = 'https://raw.githubusercontent.com/adrai/flowchart.js/master/release/flowchart.min.js'
+    url_snap = 'https://bramp.github.io/js-sequence-diagrams/js/snap.svg-min.js'
     url_sequence_diagram = 'https://raw.githubusercontent.com/bramp/js-sequence-diagrams/master/dist/sequence-diagram-min.js'
     
-    js_include = b"""
+    url_vendor = '/Applications/Quiver.app/Contents/Resources/dist/vendor'
+    
+    js_include = b"""<div>
     <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
     <script src="../.resources/raphael-min.js"></script>
     <script src="../.resources/underscore-min.js"></script>
+    <script src="../.resources/snap.svg-min.js"></script>
     <script src="../.resources/sequence-diagram-min.js"></script>
-    <script src="../.resources/flowchart.min.js"></script>
+    <script src="../.resources/flowchart.min.js"></script></div>
     """
+
+    js_include = b"""<div>
+    <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+      <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+    <script src="../.resources/vendor/raphael-min.js"></script>
+    <script src="../.resources/vendor/underscore-min.js"></script>
+    <script src="../.resources/vendor/sequence-diagram-min.js"></script>
+    <script src="../.resources/vendor/flowchart.min.js"></script></div>
+    """
+
     
     tpl_flow = b"""<script>
         var diagram = flowchart.parse(document.getElementById('flowtext').innerText);
         diagram.drawSVG('flow');
     </script>
     """    
+    tpl_seq = b"""
+    <script>
+$(".sequence").sequenceDiagram({theme: 'simple'});
+</script>
+    """
     
     def get_tree():
         return {nb['uuid']: {'name': nb['name'], 'notes': {n['uuid']: n for n in nb['notes']}} for nb in notebooks}
@@ -191,6 +213,12 @@ def md_export(notebooks, folder):
                 if n['uuid'] == note_uuid:
                     return n
         return None
+    
+    def search_in_tree(tree, k):
+        for x in tree:
+            if (k in tree[x]['notes']):
+                return "../" + sane(tree[x]['name']) + "/" + get_note_filename(tree[x]['notes'][k])
+        return None
 
     re_note_link = "quiver-note-url/([a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12})"
 
@@ -201,6 +229,9 @@ def md_export(notebooks, folder):
     os.system('wget -q -O %s %s' % (os.path.join(folder, '.resources', 'underscore-min.js'), url_underscore))
     os.system('wget -q -O %s %s' % (os.path.join(folder, '.resources', 'sequence-diagram-min.js'), url_sequence_diagram))
     os.system('wget -q -O %s %s' % (os.path.join(folder, '.resources', 'flowchart.min.js'), url_flowchart))
+
+    os.system('cp -r %s %s' % (url_vendor, os.path.join(folder, '.resources')))
+    
     for k in node_tree:
         nb = node_tree[k]
         log.debug(nb['name'])
@@ -221,7 +252,11 @@ def md_export(notebooks, folder):
                     s = s.replace('quiver-file-url', 'resources')
                     links = re.findall(re_note_link, s, re.I)
                     for l in links:
-                        s = s.replace('quiver-note-url/' + l, get_note_filename(nb['notes'][l]))
+                        if not l in nb['notes']:
+                            x = search_in_tree(node_tree, l)
+                            s = s.replace('quiver-note-url/' + l, x)
+                        else:
+                            s = s.replace('quiver-note-url/' + l, get_note_filename(nb['notes'].get(l,'')))
                     s += '\n'
                     if c['type'] == 'code':
                         s = "```\n" + s + "\n```"
