@@ -24,7 +24,7 @@ log.addHandler(log_handler)
 log.setLevel(logging.ERROR)
 
 LIBRARY_PATH = "/changeme/Quiver.qvlibrary"
-
+LIBRARY_PATH = "/Users/max/Dropbox/Quiver.qvlibrary"
 def quiver(path):
     book_ext = '.qvnotebook'
     def _get_notebooks():
@@ -237,6 +237,19 @@ $(".sequence").sequenceDiagram({theme: 'simple'});
         log.debug(nb['name'])
         nf = os.path.join(folder, sane(nb['name']))
         os.system('mkdir -p "%s"' % nf)
+        index = []
+        for kk in nb['notes']:
+            n = nb['notes'][kk]
+            index.append("[{}]({})\n".format(sane(n['title']).lower(), sane(n['title']).lower() + '.md'))
+        with open(os.path.join(nf, 'index.md'), mode='wb') as f:
+            f.write("# Index\n\n---\n".encode('utf8'))
+            h = None
+            for kk in sorted(index):
+                if (h != kk[1]):
+                    h = kk[1]
+                    f.write("## {}\n".format(h).encode('utf8'))
+                    
+                f.write("- {}\n".format(kk).encode('utf8'))                        
         for kk in nb['notes']:
             n = nb['notes'][kk]
             log.debug(n['title'])     
@@ -247,6 +260,8 @@ $(".sequence").sequenceDiagram({theme: 'simple'});
             j_included = False
             fname = check_fname(os.path.join(nf, sane(n['title']) + '.md'))
             with open(fname, mode='wb') as f:
+                f.write('[Index](index.md)\n'.encode('utf8'))
+                f.write('---\n'.encode('utf8'))
                 for c in n['cells']:
                     s = c['data'].replace('quiver-image-url', 'resources')
                     s = s.replace('quiver-file-url', 'resources')
