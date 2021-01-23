@@ -10,10 +10,11 @@ An utility to search or export Quiver notebooks to a markdown files.
 - Keep links between notes. 
 - Export and link resources
 - Automatic download javascript requirement:
-  - [raphael](https://raw.githubusercontent.com/DmitryBaranovskiy/raphael)
-  - [underscore](https://raw.githubusercontent.com/jashkenas/underscore)
-  - [sequence_diagram](https://raw.githubusercontent.com/bramp/js-sequence-diagrams)
-  - [flowchart](https://raw.githubusercontent.com/adrai/flowchart.js)
+		
+  - [raphael](https://raw.githubusercontent.com/DmitryBaranovskiy/raphael/master/raphael.min.js)
+  - [underscore](https://raw.githubusercontent.com/jashkenas/underscore/master/underscore-min.js)
+  - [sequence_diagram](https://raw.githubusercontent.com/bramp/js-sequence-diagrams/master/dist/sequence-diagram-min.js)
+  - [flowchart](https://raw.githubusercontent.com/adrai/flowchart.js/master/release/flowchart.min.js)
 
 
 ## Installation
