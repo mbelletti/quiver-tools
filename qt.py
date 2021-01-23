@@ -141,7 +141,7 @@ def md_export(notebooks, folder):
     """Export quiver contents in markdown"""
     
     #validFilenameChars = "-_.() %s%s" % (string.ascii_letters, string.digits)
-    validFilenameChars = "-_.() {}{}".format(string.ascii_letters, string.digits)
+    validFilenameChars = "-_.(){}{}".format(string.ascii_letters, string.digits)
     
     def sane(filename):
         cleanedFilename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore').decode('ascii')
@@ -164,7 +164,7 @@ def md_export(notebooks, folder):
     
     url_vendor = '/Applications/Quiver.app/Contents/Resources/dist/vendor'
     
-    js_include = b"""<div>
+    js_include_ = b"""<div>
     <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
     <script src="../.resources/raphael-min.js"></script>
     <script src="../.resources/underscore-min.js"></script>
@@ -186,15 +186,16 @@ def md_export(notebooks, folder):
     """
 
     
-    tpl_flow = b"""<script>
+    tpl_flow = b"""
+    <script>
         var diagram = flowchart.parse(document.getElementById('flowtext').innerText);
         diagram.drawSVG('flow');
     </script>
     """    
     tpl_seq = b"""
     <script>
-$(".sequence").sequenceDiagram({theme: 'simple'});
-</script>
+        $(".sequence").sequenceDiagram({theme: 'simple'});
+    </script>
     """
     
     def get_tree():
@@ -205,6 +206,7 @@ $(".sequence").sequenceDiagram({theme: 'simple'});
         try:
             return sane(n['title']) + '.md'
         except Exception as e:
+            log.error(e)
             raise e 
         
     def get_note(note_uuid):
@@ -240,7 +242,7 @@ $(".sequence").sequenceDiagram({theme: 'simple'});
         index = []
         for kk in nb['notes']:
             n = nb['notes'][kk]
-            index.append("[{}]({})\n".format(sane(n['title']).lower(), sane(n['title']).lower() + '.md'))
+            index.append("[{}]({})\n".format(sane(n['title']).lower(), sane(n['title']) + '.md'))
         with open(os.path.join(nf, 'index.md'), mode='wb') as f:
             f.write("# Index\n\n---\n".encode('utf8'))
             h = None
@@ -260,8 +262,11 @@ $(".sequence").sequenceDiagram({theme: 'simple'});
             j_included = False
             fname = check_fname(os.path.join(nf, sane(n['title']) + '.md'))
             with open(fname, mode='wb') as f:
-                f.write('[Index](index.md)\n'.encode('utf8'))
-                f.write('---\n'.encode('utf8'))
+                f.write('[Index](index.md)\n\n'.encode('utf8'))
+                f.write('# {} \n\n'.format(n['title']).encode('utf8'))
+
+                #f.write('---\n'.encode('utf8'))
+
                 for c in n['cells']:
                     s = c['data'].replace('quiver-image-url', 'resources')
                     s = s.replace('quiver-file-url', 'resources')
@@ -289,16 +294,11 @@ $(".sequence").sequenceDiagram({theme: 'simple'});
                             f.write(tpl_flow)
                     else:
                         try:
-                            f.write(s.encode('utf8')) #.decode('utf8'))
+                            f.write(s.encode('utf8')) 
                         except:
                             f.write(s.encode('utf8').decode('utf8'))
                 if j_included:
-                    j = b"""
-<script>
-$(".sequence").sequenceDiagram({theme: 'simple'});
-</script>                    
-"""
-                    f.write(j)
+                    f.write(tpl_seq)
                     
                     
 def main():
