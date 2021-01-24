@@ -25,6 +25,7 @@ log.setLevel(logging.ERROR)
 
 LIBRARY_PATH = "/changeme/Quiver.qvlibrary"
 
+
 def quiver(path):
     book_ext = '.qvnotebook'
     def _get_notebooks():
@@ -221,11 +222,11 @@ def md_export(notebooks, folder):
         log.debug(nb['name'])
         nf = os.path.join(folder, sane(nb['name']))
         os.system('mkdir -p "%s"' % nf)
-        nb_index.append("[{}]({})\n".format(sane(nb['name']).lower(), sane(nb['name']) + '/index.md'))        
+        nb_index.append("[{}]({})\n".format(nb['name'], sane(nb['name']) + '/index.md'))        
         index = []
         for kk in nb['notes']:
             n = nb['notes'][kk]
-            index.append("[{}]({})\n".format(sane(n['title']).lower(), sane(n['title']) + '.md'))
+            index.append("[{}]({})\n".format(n['title'], sane(n['title']) + '.md'))
         with open(os.path.join(nf, 'index.md'), mode='wb') as f:
             f.write('[Notebooks](../index.md)\n\n'.encode('utf8'))
             f.write("# Index\n\n---\n".encode('utf8'))
