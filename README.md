@@ -11,7 +11,7 @@ An utility to search or export Quiver notebooks to a markdown files.
 - Export and link resources
 - Automatic download javascript requirement:
 - Preserve sequence and flowchart diagrams
-- Create and Index with links to notes
+- Create Notebooks and notes Index
 
 
 ## Installation

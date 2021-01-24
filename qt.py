@@ -24,7 +24,7 @@ log.addHandler(log_handler)
 log.setLevel(logging.ERROR)
 
 LIBRARY_PATH = "/changeme/Quiver.qvlibrary"
-LIBRARY_PATH = "/Users/max/Dropbox/Quiver.qvlibrary"
+
 def quiver(path):
     book_ext = '.qvnotebook'
     def _get_notebooks():
