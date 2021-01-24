@@ -155,47 +155,32 @@ def md_export(notebooks, folder):
             name = os.path.splitext(fname)[0] + '_' + str(i) + os.path.splitext(fname)[1]
         return name
 
-    
-    url_raphael = 'https://raw.githubusercontent.com/DmitryBaranovskiy/raphael/master/raphael.min.js'
-    url_underscore = 'https://raw.githubusercontent.com/jashkenas/underscore/master/underscore-min.js'
-    url_flowchart = 'https://raw.githubusercontent.com/adrai/flowchart.js/master/release/flowchart.min.js'
-    url_snap = 'https://bramp.github.io/js-sequence-diagrams/js/snap.svg-min.js'
-    url_sequence_diagram = 'https://raw.githubusercontent.com/bramp/js-sequence-diagrams/master/dist/sequence-diagram-min.js'
-    
     url_vendor = '/Applications/Quiver.app/Contents/Resources/dist/vendor'
     
-    js_include_ = b"""<div>
+    js_include = b"""\n<div>
     <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
-    <script src="../.resources/raphael-min.js"></script>
-    <script src="../.resources/underscore-min.js"></script>
-    <script src="../.resources/snap.svg-min.js"></script>
-    <script src="../.resources/sequence-diagram-min.js"></script>
-    <script src="../.resources/flowchart.min.js"></script></div>
-    """
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 
-    js_include = b"""<div>
-    <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
-      <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script id="MathJax-script" async
-          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-  </script>
     <script src="../.resources/vendor/raphael-min.js"></script>
     <script src="../.resources/vendor/underscore-min.js"></script>
     <script src="../.resources/vendor/sequence-diagram-min.js"></script>
-    <script src="../.resources/vendor/flowchart.min.js"></script></div>
+    <script src="../.resources/vendor/flowchart.min.js"></script>
+</div>
     """
 
     
-    tpl_flow = b"""
+    tpl_flow = b"""\n<div>
     <script>
         var diagram = flowchart.parse(document.getElementById('flowtext').innerText);
         diagram.drawSVG('flow');
     </script>
+</div>
     """    
-    tpl_seq = b"""
+    tpl_seq = b"""\n<div>
     <script>
         $(".sequence").sequenceDiagram({theme: 'simple'});
     </script>
+</div>
     """
     
     def get_tree():
@@ -227,10 +212,6 @@ def md_export(notebooks, folder):
         
     folder = folder or 'notes'
     os.system('mkdir -p "%s"' % os.path.join(folder, '.resources'))
-    os.system('wget -q -O %s %s' % (os.path.join(folder, '.resources', 'raphael-min.js'), url_raphael))
-    os.system('wget -q -O %s %s' % (os.path.join(folder, '.resources', 'underscore-min.js'), url_underscore))
-    os.system('wget -q -O %s %s' % (os.path.join(folder, '.resources', 'sequence-diagram-min.js'), url_sequence_diagram))
-    os.system('wget -q -O %s %s' % (os.path.join(folder, '.resources', 'flowchart.min.js'), url_flowchart))
 
     os.system('cp -r %s %s' % (url_vendor, os.path.join(folder, '.resources')))
     
@@ -280,23 +261,20 @@ def md_export(notebooks, folder):
                     s += '\n'
                     if c['type'] == 'code':
                         s = "```\n" + s + "\n```"
-                        f.write(s.encode('utf8')) #.decode('utf8'))
+                        f.write(s.encode('utf8')) 
                     elif c['type'] == 'diagram':
                         if not j_included:
                             f.write(js_include)
                             j_included = True
                         if c['diagramType'] == 'sequence':
-                            s = '<div class="sequence">' + s + '</div>\n'
-                            f.write(s.encode('utf8')) #.decode('utf8'))
+                            s = '\n<div class="sequence">' + s + '</div>\n'
+                            f.write(s.encode('utf8')) 
                         elif c['diagramType'] == 'flow':
                             f.write(str('\n<div id="flowtext">' + s.replace('\n', '<br>') + '</div>\n').encode('utf8'))
                             f.write('\n<div id="flow"></div>\n'.encode('utf8'))
                             f.write(tpl_flow)
                     else:
-                        try:
-                            f.write(s.encode('utf8')) 
-                        except:
-                            f.write(s.encode('utf8').decode('utf8'))
+                        f.write(s.encode('utf8')) 
                 if j_included:
                     f.write(tpl_seq)
                     
