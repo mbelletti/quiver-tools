@@ -141,7 +141,7 @@ def md_export(notebooks, folder):
     """Export quiver contents in markdown"""
     
     #validFilenameChars = "-_.() %s%s" % (string.ascii_letters, string.digits)
-    validFilenameChars = "-_.(){}{}".format(string.ascii_letters, string.digits)
+    validFilenameChars = "-.(){}{}".format(string.ascii_letters, string.digits)
     
     def sane(filename):
         cleanedFilename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore').decode('ascii')
@@ -215,16 +215,19 @@ def md_export(notebooks, folder):
 
     os.system('cp -r %s %s' % (url_vendor, os.path.join(folder, '.resources')))
     
+    nb_index = []
     for k in node_tree:
         nb = node_tree[k]
         log.debug(nb['name'])
         nf = os.path.join(folder, sane(nb['name']))
         os.system('mkdir -p "%s"' % nf)
+        nb_index.append("[{}]({})\n".format(sane(nb['name']).lower(), sane(nb['name']) + '/index.md'))        
         index = []
         for kk in nb['notes']:
             n = nb['notes'][kk]
             index.append("[{}]({})\n".format(sane(n['title']).lower(), sane(n['title']) + '.md'))
         with open(os.path.join(nf, 'index.md'), mode='wb') as f:
+            f.write('[Notebooks](../index.md)\n\n'.encode('utf8'))
             f.write("# Index\n\n---\n".encode('utf8'))
             h = None
             for kk in sorted(index):
@@ -277,6 +280,10 @@ def md_export(notebooks, folder):
                         f.write(s.encode('utf8')) 
                 if j_included:
                     f.write(tpl_seq)
+        with open(os.path.join(folder, 'index.md'), mode='wb') as f:
+            f.write("# Notebooks\n\n".format(n).encode('utf8'))                    
+            for n in sorted(nb_index):
+                f.write("- {}\n".format(n).encode('utf8'))                    
                     
                     
 def main():
