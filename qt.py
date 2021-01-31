@@ -14,9 +14,7 @@ import argparse
 import re
 import unicodedata, string
 import imghdr
-from glob import glob
 import pathlib
-import shutil
 
 import logging
 
@@ -253,10 +251,11 @@ def md_export(notebooks, folder):
                 note_resources = resources_path.glob('*')
                 for resource in note_resources:
                     if not resource.suffix:
-                        _ = resource.with_suffix('.' + imghdr.what(resource))
-                        resources_renamed[resource] = _
-                        resource.rename(_)
-                    
+                        ext = imghdr.what(resource)
+                        if ext:
+                            _ = resource.with_suffix('.' + ext)
+                            resources_renamed[resource] = _
+                            resource.rename(_)                    
                 
             j_included = False
             fname = check_fname(os.path.join(nf, sane(n['title']) + '.md'))
