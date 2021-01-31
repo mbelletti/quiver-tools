@@ -13,8 +13,13 @@ import json
 import argparse
 import re
 import unicodedata, string
+import imghdr
+from glob import glob
+import pathlib
+import shutil
 
 import logging
+
 log = logging.getLogger(__file__) # create logger
 #log_handler = logging.FileHandler(__APPNAME__ + ".log")
 log_handler = logging.StreamHandler(sys.stdout)
@@ -24,6 +29,7 @@ log.addHandler(log_handler)
 log.setLevel(logging.ERROR)
 
 LIBRARY_PATH = "/changeme/Quiver.qvlibrary"
+LIBRARY_PATH = "/Users/max/Dropbox/Quiver.qvlibrary"
 
 
 def quiver(path):
@@ -241,8 +247,17 @@ def md_export(notebooks, folder):
             n = nb['notes'][kk]
             log.debug(n['title'])     
             resources = n.get('resources')
+            resources_path = pathlib.Path(nf) / 'resources'
+            resources_renamed = {}
             if resources:
                 os.system('cp -r "%s" "%s"' % (n['resources'], nf))
+                note_resources = resources_path.glob('*')
+                for resource in note_resources:
+                    if not resource.suffix:
+                        _ = resource.with_suffix('.' + imghdr.what(resource))
+                        resources_renamed[resource] = _
+                        resource.rename(_)
+                    
                 
             j_included = False
             fname = check_fname(os.path.join(nf, sane(n['title']) + '.md'))
@@ -254,6 +269,8 @@ def md_export(notebooks, folder):
 
                 for c in n['cells']:
                     s = c['data'].replace('quiver-image-url', 'resources')
+                    for r in resources_renamed:
+                        s = s.replace(r.name, resources_renamed[r].name)
                     s = s.replace('quiver-file-url', 'resources')
                     links = re.findall(re_note_link, s, re.I)
                     for l in links:
