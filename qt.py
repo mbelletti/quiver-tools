@@ -27,7 +27,7 @@ log.addHandler(log_handler)
 log.setLevel(logging.ERROR)
 
 LIBRARY_PATH = "/changeme/Quiver.qvlibrary"
-
+LIBRARY_PATH = "/Users/max/Dropbox (Maestral)/Quiver.qvlibrary"
 
 def quiver(path):
     book_ext = '.qvnotebook'
@@ -141,14 +141,31 @@ def searchin_notes(notes, query):
     return _
 
 
-def md_export(notebooks, folder):
+def md_export(notebooks, folder, index=True):
     """Export quiver contents in markdown"""
+
+    def create_index(nb_index, nb, sane, nf):
+        nb_index.append("[{}]({})\n".format(nb['name'], sane(nb['name']) + '/index.md'))        
+        index = []
+        for kk in nb['notes']:
+            n = nb['notes'][kk]
+            index.append("[{}]({})\n".format(n['title'], sane(n['title']) + '.md'))
+        with open(os.path.join(nf, 'index.md'), mode='wb') as f:
+            f.write('[Notebooks](../index.md)\n\n'.encode('utf8'))
+            f.write("# Index\n\n---\n".encode('utf8'))
+            h = None
+            for kk in sorted(index):
+                if (h != kk[1]):
+                    h = kk[1]
+                    f.write("## {}\n".format(h).encode('utf8'))
+                    
+                f.write("- {}\n".format(kk).encode('utf8'))                        
     
     #validFilenameChars = "-_.() %s%s" % (string.ascii_letters, string.digits)
-    validFilenameChars = "-.(){}{}".format(string.ascii_letters, string.digits)
+    validFilenameChars = "-_.(){}{}".format(string.ascii_letters, string.digits)
     
     def sane(filename):
-        cleanedFilename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore').decode('ascii')
+        cleanedFilename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore').decode('ascii').replace(' ', '_')
         return ''.join(c for c in cleanedFilename if c in validFilenameChars)
     
     def check_fname(fname):
@@ -198,18 +215,28 @@ def md_export(notebooks, folder):
             log.error(e)
             raise e 
         
-    def get_note(note_uuid):
-        for nb in notebooks:
-            for n in nb['notes']:
-                if n['uuid'] == note_uuid:
-                    return n
-        return None
+    #def get_note(note_uuid):
+        #for nb in notebooks:
+            #for n in nb['notes']:
+                #if n['uuid'] == note_uuid:
+                    #return n
+        #return None
     
     def search_in_tree(tree, k):
         for x in tree:
             if (k in tree[x]['notes']):
                 return "../" + sane(tree[x]['name']) + "/" + get_note_filename(tree[x]['notes'][k])
         return None
+
+    def fix_image_link(stringa):
+        pattern = "(!\[IMAGE\]\(.*)(\ \=\d*x\d*)\)"
+        ms = stringa
+        m = re.findall(pattern, stringa)
+        while m:
+            ms = re.sub(pattern,"\g<1>)", ms)
+            m = re.findall(pattern, ms)
+            #print(ms)
+        return ms
 
     re_note_link = "quiver-note-url/([a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12})"
 
@@ -225,21 +252,8 @@ def md_export(notebooks, folder):
         log.debug(nb['name'])
         nf = os.path.join(folder, sane(nb['name']))
         os.system('mkdir -p "%s"' % nf)
-        nb_index.append("[{}]({})\n".format(nb['name'], sane(nb['name']) + '/index.md'))        
-        index = []
-        for kk in nb['notes']:
-            n = nb['notes'][kk]
-            index.append("[{}]({})\n".format(n['title'], sane(n['title']) + '.md'))
-        with open(os.path.join(nf, 'index.md'), mode='wb') as f:
-            f.write('[Notebooks](../index.md)\n\n'.encode('utf8'))
-            f.write("# Index\n\n---\n".encode('utf8'))
-            h = None
-            for kk in sorted(index):
-                if (h != kk[1]):
-                    h = kk[1]
-                    f.write("## {}\n".format(h).encode('utf8'))
-                    
-                f.write("- {}\n".format(kk).encode('utf8'))                        
+        if index:
+            create_index(nb_index, nb, sane, nf)
         for kk in nb['notes']:
             n = nb['notes'][kk]
             log.debug(n['title'])     
@@ -260,13 +274,17 @@ def md_export(notebooks, folder):
             j_included = False
             fname = check_fname(os.path.join(nf, sane(n['title']) + '.md'))
             with open(fname, mode='wb') as f:
-                f.write('[Index](index.md)\n\n'.encode('utf8'))
-                f.write('# {} \n\n'.format(n['title']).encode('utf8'))
-
-                #f.write('---\n'.encode('utf8'))
+                if index:
+                    f.write('[Index](index.md)\n\n'.encode('utf8'))
+                    f.write('# {} \n\n'.format(n['title']).encode('utf8'))
 
                 for c in n['cells']:
+                    #pattern = "\ \=.*x\d*"
+                        
                     s = c['data'].replace('quiver-image-url', 'resources')
+                    
+                    #s = re.sub(pattern, "", s)
+                    s = fix_image_link(s)
                     for r in resources_renamed:
                         s = s.replace(r.name, resources_renamed[r].name)
                     s = s.replace('quiver-file-url', 'resources')
@@ -296,10 +314,12 @@ def md_export(notebooks, folder):
                         f.write(s.encode('utf8')) 
                 if j_included:
                     f.write(tpl_seq)
-        with open(os.path.join(folder, 'index.md'), mode='wb') as f:
-            f.write("# Notebooks\n\n".format(n).encode('utf8'))                    
-            for n in sorted(nb_index):
-                f.write("- {}\n".format(n).encode('utf8'))                    
+                    
+        if index:                
+            with open(os.path.join(folder, 'index.md'), mode='wb') as f:
+                f.write("# Notebooks\n\n".format(n).encode('utf8'))                    
+                for n in sorted(nb_index):
+                    f.write("- {}\n".format(n).encode('utf8'))                    
                     
                     
 def main():
@@ -332,7 +352,7 @@ def main():
         
     notebooks = quiver(args.library)
     
-    query = args.query
+
     if args.exclude_notebooks:
         notebooks = [nb for nb in notebooks if not nb['uuid'] in args.exclude_notebooks]
         
@@ -342,7 +362,7 @@ def main():
     if args.list:
         print(",\n".join([str({k: nb[k] for k in nb if k != 'notes'}) for nb in notebooks if re.match(args.query, nb['name'])]))
     elif args.export:
-        md_export(notebooks, args.export)        
+        md_export(notebooks, args.export, index=False)        
     else:
         notes = searchin_notebook(notebooks, args.query)
         if notes:
