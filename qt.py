@@ -16,11 +16,12 @@ import unicodedata
 import string
 import imghdr
 import pathlib
-
+from typing import Any
 import logging
 
-log = logging.getLogger(__file__) # create logger
-#log_handler = logging.FileHandler(__APPNAME__ + ".log")
+
+log = logging.getLogger(__file__)  # create logger
+# log_handler = logging.FileHandler(__APPNAME__ + ".log")
 log_handler = logging.StreamHandler(sys.stdout)
 log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 log_handler.setFormatter(log_formatter)
@@ -29,24 +30,36 @@ log.setLevel(logging.ERROR)
 
 LIBRARY_PATH = "/changeme/Quiver.qvlibrary"
 
+
 def quiver(path):
+    """
+    Extract Notebooks and Notes from quiver json
+    """
     book_ext = '.qvnotebook'
-    def _get_notebooks():
+
+    def _get_notebooks() -> dict:
+        """
+        Notebooks generator        
+        """
         for n in sorted(os.listdir(path)):
             if n.endswith(book_ext):
-                #k = os.path.splitext(n)[0]
                 d = json.loads(open(os.path.join(path, n, 'meta.json')).read())
-                #print d
                 d['notes'] = _get_notes(d)
                 yield d    
 
     def _get_notes(nb):
+        """
+        Notes generator        
+        """
         lpath = os.path.join(path, nb['uuid'] + book_ext)
         for n in sorted(os.listdir(lpath)):
-            if not '.json' in os.path.splitext(n):
+            if '.json' in os.path.splitext(n):
+                pass
+            else:
                 yield _get_note(nb, n)
 
     def _get_note(nb, notedir):
+        "Note"
         lpath = os.path.join(path, nb['uuid'] + book_ext, notedir)
         n = json.loads(open(os.path.join(lpath, 'meta.json')).read())
         n.update(dict(nb=nb['name'], nb_uuid=nb['uuid'],))
@@ -58,7 +71,10 @@ def quiver(path):
     return _get_notebooks()
 
 
-def check_note(note, query):
+def check_note(note, query) -> Any:
+    """
+    Filter note against query
+    """
     if re.search(query, note['title'], flags=re.I):
         return note
     else:
@@ -67,15 +83,20 @@ def check_note(note, query):
                 return note
 
 
-def alfred_search(query, lib=LIBRARY_PATH, on_notebooks=None, exclude_notebooks=None):
+def alfred_search(query, 
+                  lib=LIBRARY_PATH, 
+                  on_notebooks=None, 
+                  exclude_notebooks=None):
+    """
+    Perform a search and return Alfred formatted items
+    """
+    
     min_chars = 2
 
     tag_tpl = "<%(name)s%(attrs)s>%(value)s</%(name)s>"
-    tag = lambda name, value, attrs=[]: tag_tpl % dict(name=name,
-                                                       value=value,
-                                                       attrs=(" " + " ".join(attrs) if attrs else ''))
+    tag = lambda name, value, attrs=[]: tag_tpl % dict(name=name, value=value, attrs=(" " + " ".join(attrs) if attrs else ''))
     
-    attr = lambda name, value: '%s="%s"' % (name, value)
+    attr = lambda name, value: '%s="%s"' % (name, value) 
     default_attrs = [attr('valid', 'no')]
     
     def ae(title, sub, attrs=None):
@@ -86,9 +107,11 @@ def alfred_search(query, lib=LIBRARY_PATH, on_notebooks=None, exclude_notebooks=
     
         """
         attrs = attrs or default_attrs
-        return tag('item', "".join([tag('title',title),
-                                    tag('subtitle',sub)]),
-                    attrs=attrs)
+        return tag('item', "".join([
+            tag('title', title), 
+            tag('subtitle', sub)]),
+            attrs=attrs
+        )
 
     def output(items):
         # items is a list tags
@@ -96,18 +119,17 @@ def alfred_search(query, lib=LIBRARY_PATH, on_notebooks=None, exclude_notebooks=
         out = tag('items', "".join([i for i in items]))
         print(xml_head + out)
 
-
     note_ae = lambda note, attrs=default_attrs: ae(note['title'], note['uuid'], attrs=attrs)
     notes_to_alfred = lambda notes: output([note_ae(n, attrs=[attr('valid', 'YES'), attr('arg', 'quiver:///notes/' + n['uuid']), attr('type', 'file')]) for n in notes])
 
-    
-
     if len(query) < min_chars:
-        items = [ae('Query too short',
-                     'The query needs to be at least ' + str(min_chars) + ' characters long')
-                 ]
+        items = [
+            ae('Query too short',
+               'The query needs to be at least ' + str(min_chars) + ' characters long')
+        ]
         output(items)
         return
+    
     notebooks = quiver(lib)
     
     if exclude_notebooks:
@@ -118,7 +140,6 @@ def alfred_search(query, lib=LIBRARY_PATH, on_notebooks=None, exclude_notebooks=
         
     notes = searchin_notebook(notebooks, query, exclude_notebooks)
     notes_to_alfred(notes)
-
 
 
 def searchin_notebook(notebooks, query, exclude_notebooks=None):
@@ -161,7 +182,6 @@ def md_export(notebooks, folder, index=True):
                     
                 f.write("- {}\n".format(kk).encode('utf8'))                        
     
-    #validFilenameChars = "-_.() %s%s" % (string.ascii_letters, string.digits)
     validFilenameChars = "-_.(){}{}".format(string.ascii_letters, string.digits)
     
     def sane(filename):
@@ -188,7 +208,6 @@ def md_export(notebooks, folder, index=True):
     <script src="../.resources/vendor/flowchart.min.js"></script>
 </div>
     """
-
     
     tpl_flow = b"""\n<div>
     <script>
@@ -215,13 +234,6 @@ def md_export(notebooks, folder, index=True):
             log.error(e)
             raise e 
         
-    #def get_note(note_uuid):
-        #for nb in notebooks:
-            #for n in nb['notes']:
-                #if n['uuid'] == note_uuid:
-                    #return n
-        #return None
-    
     def search_in_tree(tree, k):
         for x in tree:
             if (k in tree[x]['notes']):
