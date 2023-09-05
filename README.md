@@ -17,10 +17,17 @@ An utility to search or export Quiver notebooks to a markdown files.
 ## Installation
 
 - [Download the script](https://raw.githubusercontent.com/mbelletti/quiver-tools/master/qt.py)
+- change `LIBRARY_PATH = "/changeme/Quiver.qvlibrary"` to your `Quiver.qvlibrary` or you can set with `-L` argument.
 - Put it on your path
 - `chmod u+x qt.py`
 
 ## Usage
+
+To export all your notes to `./tmp`
+
+`./qt.py -s ./tmp`
+
+	~#./qt.py -h
 
 	usage: qt.py [-h] [-l] [-q QUERY] [-n NOTEBOOKS] [-e EXCLUDE_NOTEBOOKS]
 	             [-x EXPORT] [-v] [-L LIBRARY]
