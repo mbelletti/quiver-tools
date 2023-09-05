@@ -339,7 +339,9 @@ def main():
     parser.add_argument("-x", "--export",  help="Export to folder",
                         default='',type=str)    
     parser.add_argument("-v", "--verbose",  help="Verbose",
-                        default=False, action="store_true")    
+                        default=False, action="store_true")
+    parser.add_argument("-i", "--index",  help="Create an index for each notebook",
+                        action="store_true")        
     parser.add_argument("-L", "--library",  help="Quiver library path",
                         default=LIBRARY_PATH, type=str)    
     args = parser.parse_args()
@@ -366,7 +368,7 @@ def main():
     if args.list:
         print(",\n".join([str({k: nb[k] for k in nb if k != 'notes'}) for nb in notebooks if re.match(args.query, nb['name'])]))
     elif args.export:
-        md_export(notebooks, args.export, index=False)        
+        md_export(notebooks, args.export, index=args.index)        
     else:
         notes = searchin_notebook(notebooks, args.query)
         if notes:

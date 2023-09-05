@@ -29,27 +29,26 @@ To export all your notes to `./tmp`
 
 	~#./qt.py -h
 
-	usage: qt.py [-h] [-l] [-q QUERY] [-n NOTEBOOKS] [-e EXCLUDE_NOTEBOOKS]
-	             [-x EXPORT] [-v] [-L LIBRARY]
+	usage: qt.py [-h] [-l] [-q QUERY] [-n NOTEBOOKS] [-e EXCLUDE_NOTEBOOKS] [-x EXPORT] [-v] [-i] [-L LIBRARY]
 
 	Quiver helper
 
-	optional arguments:
-	  -h, --help            show this help message and exit
-	  -l, --list            List notebooks
-	  -q QUERY, --query QUERY
-	                        Search <query> in notes
-	  -n NOTEBOOKS, --notebooks NOTEBOOKS
-	                        Restrict search in notebooks. Needs uuids space
-	                        separated
-	  -e EXCLUDE_NOTEBOOKS, --exclude_notebooks EXCLUDE_NOTEBOOKS
-	                        Exclude notebooks from search. Needs uuids space
-	                        separated
-	  -x EXPORT, --export EXPORT
-	                        Export to folder
-	  -v, --verbose         Verbose
-	  -L LIBRARY, --library LIBRARY
-	                        Quiver library path
+	options:
+	-h, --help            show this help message and exit
+	-l, --list            List notebooks
+	-q QUERY, --query QUERY
+							Search <query> in notes
+	-n NOTEBOOKS, --notebooks NOTEBOOKS
+							Restrict search in notebooks. Needs uuids space separated
+	-e EXCLUDE_NOTEBOOKS, --exclude_notebooks EXCLUDE_NOTEBOOKS
+							Exclude notebooks from search. Needs uuids space separated
+	-x EXPORT, --export EXPORT
+							Export to folder
+	-v, --verbose         Verbose
+	-i, --index           Create an index for each notebook
+	-L LIBRARY, --library LIBRARY
+							Quiver library path
+
 
 ## Feature Requests and Issues
 
