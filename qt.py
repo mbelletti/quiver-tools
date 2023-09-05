@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding:utf-8
+# coding:utf-8
 
 """
   Author: Massimiliano Belletti <max@belletti.net>
@@ -12,7 +12,8 @@ import os
 import json
 import argparse
 import re
-import unicodedata, string
+import unicodedata
+import string
 import imghdr
 import pathlib
 
@@ -275,8 +276,12 @@ def md_export(notebooks, folder, index=True):
             with open(fname, mode='wb') as f:
                 if index:
                     f.write('[Index](index.md)\n\n'.encode('utf8'))
-                    f.write('# {} \n\n'.format(n['title']).encode('utf8'))
-
+                    f.write(f'# {n["title"]} \n\n'.encode('utf8'))
+                if n['tags']:
+                    f.write("tags: [".encode('utf8'))
+                    f.write(", ".join([f'`{t}`' for t in n['tags']]).encode('utf8'))
+                    f.write("]".encode('utf8'))
+                    f.write('\n\n'.encode('utf8'))
                 for c in n['cells']:
                     #pattern = "\ \=.*x\d*"
                         
