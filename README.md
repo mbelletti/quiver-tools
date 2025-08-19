@@ -25,7 +25,7 @@ An utility to search or export Quiver notebooks to a markdown files.
 
 To export all your notes to `./tmp`
 
-`./qt.py -s ./tmp`
+`./qt.py -x ./tmp`
 
 	~#./qt.py -h
 
